@@ -4,6 +4,7 @@
   import Amplitude from "amplitudejs";
   import { onMount } from "svelte";
   let playing = false;
+  let amplitude = Amplitude;
   // Song list
   const playlist = [
     {
@@ -25,7 +26,7 @@
   ];
 
   onMount(() => {
-    Amplitude.init({
+    amplitude.init({
       bindings: {
         37: "prev",
         39: "next",
@@ -33,9 +34,17 @@
       },
       songs: playlist,
       debug: true,
+      callbacks: {
+        pause: function () {
+          playing = !playing;
+        },
+        playing: function () {
+          playing = !playing;
+        },
+      },
     });
   });
-  console.log(`amplitude: ${Amplitude}`);
+  $: playing, console.log(playing);
 </script>
 
 <div
@@ -105,20 +114,11 @@
         <button
           class="rounded-full w-8 h-8 flex items-center justify-center pl-0.5 ring-2 ring-gray-100 focus:outline-none amplitude-play-pause"
           id="play-pause"
-          on:click={() => {
-            playing = !playing;
-            console.log(console.log(Amplitude.player_state));
-          }}
         >
-          <svg
-            class="w-5 h-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" stroke-width="2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+          </svg>
+          
         </button>
         <!-- NEXT BUTTON -->
         <button class="focus:outline-none amplitude-next">
