@@ -3,9 +3,11 @@
 	// Default binding doesn't fucking work
 	import TabbedComponent from '$lib/TabbedComponent.svelte';
 	import Amplitude from 'amplitudejs';
+  import { onDestroy, onMount } from 'svelte';
+  import {current_song_store} from '../util/store';
+
 	let playing = false;
-	import { onMount } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
+	
 
 	// Song list
 	const playlist = [
@@ -47,20 +49,25 @@
 			}
 		});
 	});
+
+  const unsubscribe = current_song_store.subscribe(data => {
+    Amplitude.stop();
+    Amplitude.playNow(data);
+  })
+
+  onDestroy(unsubscribe);
 </script>
 
 <main>
-	<div class="min-h-screen bg-gray-100 flex flex-col items-center py-10" id="player">
-		<div class="max-w-xl bg-white rounded-lg shadow-lg overflow-hidden">
+	<div class="min-h-screen bg-gray-100 flex flex-col items-center lg:py-10" id="player">
+		<div class="max-w-xl bg-white lg:rounded-lg shadow-lg overflow-hidden">
 			<div class="relative" id="amplitude-album-art">
 				<!-- svelte-ignore a11y-img-redundant-alt -->
 				<img
 					data-amplitude-song-info="cover_art_url"
 					alt="photo"
-					class="object-contain"
+					class="object-cover"
 					id="amplitude-album-art"
-					width="390"
-					height="121"
 				/>
 				<div
 					class="absolute p-4 inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-gray-900 backdrop backdrop-blur-5 text-white"
@@ -144,7 +151,7 @@
 					: <span class="amplitude-duration-seconds" />
 				</div>
 			</div>
-			<TabbedComponent />
+			<TabbedComponent/>
 		</div>
 		<footer class="footer items-end justify-center p-4 text-neutral-content">
 			<aside class="items-end grid-flow-col">

@@ -2,9 +2,11 @@
 	// @ts-nocheck
 	let search_query = '';
 	let suggestions = [];
+	let search_results = '';
 	let open_dropdown = false;
+	import { current_song_store } from '../../util/store';
 
-	async function searchSuggestions(value) {
+	async function search_suggestion(value) {
 		const query = value;
 		if (!query) return;
 
@@ -15,15 +17,31 @@
 			}
 		});
 
-		if (response.status !== 200){
+		if (response.status !== 200) {
 			open_dropdown = false;
 			return;
-		};
+		}
 		suggestions = await response.json();
 		open_dropdown = true;
 	}
 
-	$: suggestions, console.log('Suggestions', suggestions);
+	async function search_video(value) {
+		const query = value;
+		const response = await fetch(`/api/search?q=${query}`, {
+			method: 'GET',
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		if (response.status !== 200) {
+			return console.error(response.status, response);
+		}
+
+		search_results = await response.json();
+	}
+
+	$: search_results, console.log('search results', search_results);
 </script>
 
 <div class="flex items-center pb-1 px-2">
@@ -35,8 +53,8 @@
 			class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 rounded-md"
 			placeholder="Search for music"
 			required=""
-			on:input={(e) => searchSuggestions(e.target.value)}
-			on:change={(e) => searchSuggestions(e.target.value)}
+			on:input={(e) => search_suggestion(e.target.value)}
+			on:change={(e) => search_suggestion(e.target.value)}
 			bind:value={search_query}
 		/>
 	</div>
@@ -61,17 +79,19 @@
 		>Search
 	</button>
 </div>
-<div hidden={!open_dropdown}>
+<div hidden={search_query.length == 0}>
 	{#if suggestions.length > 0}
 		<div class="h-40 overflow-y-scroll w-full">
 			<div class="shadow menu dropdown-content z-[40] bg-base-100 rounded-box px-4">
 				<ul class="menu menu-compact">
 					{#each suggestions as item, index}
 						<li key={index} class="border-b border-b-base-content/10 w-full">
-							<button on:click={(e) => {
-								search_query = e.target.innerText;
-								open_dropdown = false;
-							}}>{item}</button>
+							<button
+								on:click={(e) => {
+									search_video(e.target.innerText);
+									search_query = '';
+								}}>{item}</button
+							>
 						</li>
 					{/each}
 				</ul>
@@ -79,3 +99,56 @@
 		</div>
 	{/if}
 </div>
+
+{#if search_results.length > 0}
+	<div class="h-52 overflow-y-scroll w-full">
+		{#each search_results as item}
+			<div>
+				<ul class="text-xs sm:text-base divide-y border-t cursor-default">
+					<li class="flex items-center space-x-3 hover:bg-gray-100">
+						<button
+							class="p-3 hover:bg-green-500 group focus:outline-none"
+							on:click={() => {
+								current_song_store.update((data) => {
+									const song_info = {
+										name: item.title,
+										artist: item.author.name,
+										album: item.author.name,
+										url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
+										cover_art_url: item.thumbnail.url
+									};
+
+									return song_info;
+								});
+							}}
+						>
+							<svg
+								class="w-4 h-4 group-hover:text-white"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
+							>
+						</button>
+						<div class="flex-1">{item.title}</div>
+						<div class="text-xs text-gray-400 px-1.5">{item.duration}</div>
+						<button class="focus:outline-none pr-4 group">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
+								class="w-6 h-6"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+							</svg>
+						</button>
+					</li>
+				</ul>
+			</div>
+		{/each}
+	</div>
+{/if}
