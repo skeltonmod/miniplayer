@@ -3,8 +3,10 @@
   // Default binding doesn't fucking work
   import Amplitude from "amplitudejs";
   import { onMount } from "svelte";
+    import search from "./lib/api/suggestion";
   let playing = false;
   let amplitude = Amplitude;
+  let search_query = "";
   // Song list
   const playlist = [
     {
@@ -35,26 +37,39 @@
       songs: playlist,
       debug: true,
       callbacks: {
+        // Dogshit coding practice
         pause: function () {
-          playing = !playing;
+          playing = false;
         },
         playing: function () {
-          playing = !playing;
+          playing = true;
         },
       },
     });
   });
-  $: playing, console.log(playing);
+
+
+  async function search_suggestion(value){
+    const response = await search(value);
+
+    if(response.status !== 200){
+      return
+    }
+
+    console.log(response);
+  }
 </script>
 
 <div
   class="min-h-screen bg-gray-100 flex flex-col items-center py-10"
   id="player"
 >
+
   <div class="max-w-xl bg-white rounded-lg shadow-lg overflow-hidden">
     <div class="relative" id="amplitude-album-art">
+      <!-- svelte-ignore a11y-img-redundant-alt -->
       <img
-        src="https://i.ytimg.com/vi/Zk-nheLN0j8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLATE9J6n4wvYkk6eY7mWiJMcl6_8Q"
+        data-amplitude-song-info="cover_art_url"
         alt="photo"
         class="object-contain"
         id="amplitude-album-art"
@@ -64,19 +79,12 @@
       <div
         class="absolute p-4 inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-gray-900 backdrop backdrop-blur-5 text-white"
       >
-        <h3 class="font-bold">【Vocaloid】ENISHI【Drumstep】</h3>
-        <span class="opacity-70">Tohou Collection Vol. 1</span>
+        <h3 class="font-bold song-name" data-amplitude-song-info="name">
+          Song Name
+        </h3>
+        <span class="opacity-70" data-amplitude-song-info="artist">Artist</span>
       </div>
     </div>
-    <!-- <div>
-      <div class="relative h-1 bg-gray-200">
-        <div
-          class="absolute h-full w-1/2 bg-green-500 flex items-center justify-end"
-        >
-          <div class="rounded-full w-3 h-3 bg-white shadow" />
-        </div>
-      </div>
-    </div> -->
     <div class="relative h-1 bg-gray-200">
       <progress
         id="song-played-progress"
@@ -112,13 +120,36 @@
         </button>
         <!-- PLAY BUTTON -->
         <button
-          class="rounded-full w-8 h-8 flex items-center justify-center pl-0.5 ring-2 ring-gray-100 focus:outline-none amplitude-play-pause"
+          class="w-8 h-8 flex items-center justify-center focus:outline-none amplitude-play-pause"
           id="play-pause"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" stroke-width="2" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-          </svg>
-          
+          {#if playing}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              stroke-width="2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+              />
+            </svg>
+          {:else}
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><polygon points="5 3 19 12 5 21 5 3" /></svg
+            >
+          {/if}
         </button>
         <!-- NEXT BUTTON -->
         <button class="focus:outline-none amplitude-next">
@@ -146,6 +177,10 @@
         : <span class="amplitude-duration-seconds" />
       </div>
     </div>
+    <div class="tabs justify-start pb-1.5">
+      <a class="tab tab-lifted tab-active">Search</a>
+      <a class="tab tab-lifted">Queue</a>
+    </div>
     <div class="flex items-center pb-2.5 px-2.5">
       <label for="voice-search" class="sr-only">Search</label>
       <div class="relative w-full">
@@ -155,6 +190,8 @@
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 rounded-md"
           placeholder="Search for music"
           required=""
+          bind:value={search_query}
+          on:input={(e) => {search_suggestion(e.target.value)}}
         />
       </div>
       <button
@@ -177,65 +214,30 @@
         >Search
       </button>
     </div>
-    <ul class="text-xs sm:text-base divide-y border-t cursor-default">
-      <li class="flex items-center space-x-3 hover:bg-gray-100">
-        <button class="p-3 hover:bg-green-500 group focus:outline-none">
-          <svg
-            class="w-4 h-4 group-hover:text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
-          >
-        </button>
-        <div class="flex-1">Frizk - ALL MY FELLAS</div>
-        <div class="text-xs text-gray-400">2:21</div>
-        <button class="focus:outline-none pr-4 group">
-          <svg
-            class="w-4 h-4 group-hover:text-green-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            ><path
-              d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"
-            /></svg
-          >
-        </button>
-      </li>
-      <li class="flex items-center space-x-3 hover:bg-gray-100">
-        <button class="p-3 hover:bg-green-500 group focus:outline-none">
-          <svg
-            class="w-4 h-4 group-hover:text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
-          >
-        </button>
-        <div class="flex-1">Lil Darkie - MUSIC FOR NIGGAS</div>
-        <div class="text-xs text-gray-400">3:58</div>
-        <button class="focus:outline-none pr-4 group">
-          <svg
-            class="w-4 h-4 group-hover:text-green-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            ><path
-              d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"
-            /></svg
-          >
-        </button>
-      </li>
-    </ul>
+    <div>
+      <ul class="text-xs sm:text-base divide-y border-t cursor-default">
+        <li class="flex items-center space-x-3 hover:bg-gray-100">
+          <button class="p-3 hover:bg-green-500 group focus:outline-none">
+            <svg
+              class="w-4 h-4 group-hover:text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><polygon points="5 3 19 12 5 21 5 3" /></svg
+            >
+          </button>
+          <div class="flex-1">Frizk - ALL MY FELLAS</div>
+          <div class="text-xs text-gray-400">2:21</div>
+          <button class="focus:outline-none pr-4 group">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>            
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
