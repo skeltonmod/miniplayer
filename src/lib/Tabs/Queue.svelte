@@ -18,7 +18,7 @@
 	onDestroy(current_song_sub);
 </script>
 
-<div>
+<div class="scrollable-content h-auto max-h-52 overflow-y-scroll w-full">
 	{#if playlist.length > 0}
 		<ul class="text-xs sm:text-base divide-y border-t cursor-default">
 			{#each playlist as item}
@@ -66,3 +66,16 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.scrollable-content::-webkit-scrollbar {
+		display: none;
+	}
+	.scrollable-content {
+		-ms-overflow-style: none;
+	}
+
+	.scrollable-content {
+		scrollbar-width: none;
+	}
+</style>
