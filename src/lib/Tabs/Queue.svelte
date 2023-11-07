@@ -10,7 +10,7 @@
 		playlist = data;
 	});
 
-	const current_song_sub = current_song_store.subscribe(data => {
+	const current_song_sub = current_song_store.subscribe((data) => {
 		current_song = data;
 	});
 
@@ -23,7 +23,14 @@
 		<ul class="text-xs sm:text-base divide-y border-t cursor-default">
 			{#each playlist as item}
 				<li class="flex items-center space-x-3 hover:bg-gray-100">
-					<button class="p-3 hover:bg-green-500 group focus:outline-none">
+					<button
+						on:click={() => {
+							current_song_store.update((data) => {
+								return item;
+							});
+						}}
+						class="p-3 hover:bg-green-500 group focus:outline-none"
+					>
 						<svg
 							class="w-4 h-4 group-hover:text-white"
 							viewBox="0 0 24 24"

@@ -29,7 +29,9 @@
 		"vite": "^4.4.2"
 	},
 	"dependencies": {
+		"@macfja/svelte-persistent-store": "^2.4.1",
 		"amplitudejs": "^5.3.2",
+		"lodash": "^4.17.21",
 		"youtubei.js": "^7.0.0"
 	},
 	"type": "module"

@@ -6,53 +6,79 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { current_song_store, playlist_store } from '../util/store';
 	import Image from '../asset/Elijah.png';
+	import uniqBy from "lodash/uniqBy";
 
-	let playing = false;
-
+	let player_state = 'stopped';
+	let audio_element = null;
+	let current_song = {};
+	let playlist = [];
 	// Song list
-
 	onMount(() => {
 		Amplitude.init({
-			// bindings: {
-			// 	37: 'prev',
-			// 	39: 'next',
-			// 	32: 'play_pause'
-			// },
-			debug: true,
-			songs: [],
+			songs: playlist.length ? playlist : [],
 			callbacks: {
 				// Dogshit coding practice
 				pause: function () {
 					console.log('Paused');
-					playing = false;
+					player_state = 'paused';
 				},
 				playing: function () {
-					playing = true;
-				},
-
-				stopped: function () {
-					console.log('Paused');
+					console.log('Playing');
+					player_state = 'playing';
 				}
 			}
 		});
 
-		Amplitude.addPlaylist('my-playlist', {}, []);
+		audio_element = Amplitude.getAudio();
+
+		audio_element.addEventListener('playing', function (e) {
+			player_state = 'playing';
+		});
+
+		audio_element.addEventListener('loadeddata', function(e){
+			this.play()
+		});
+
+		audio_element.addEventListener('pause', function (e) {
+			player_state = 'paused';
+		});
 	});
 
 	const current_song_sub = current_song_store.subscribe((data) => {
+		if (!Object.keys(data).length) {
+			console.error('Empty Data');
+			return {};
+		}
+		current_song = data;
 		Amplitude.stop();
 		Amplitude.playNow(data);
-
 		return data;
 	});
 
 	const playlist_sub = playlist_store.subscribe((data) => {
 		const last_song = data[data.length - 1];
-		Amplitude.addSongToPlaylist(last_song, 'my-playlist');
-		if(data.length > 0){
-			Amplitude.playPlaylistSongAtIndex( 0, 'my-playlist' )
+		//
+		if (last_song == undefined) {
+			return [];
 		}
-		return [...data, last_song];
+		if (data == undefined) {
+			return [];
+		}
+		
+		if(Amplitude.getSongs().length > 0){
+			Amplitude.addSong(last_song);
+		}else{
+			data.forEach(item => {
+				Amplitude.addSong(item);
+			});
+		}
+
+		console.log(Amplitude.getSongs());
+
+		// Clear the previous song stack to prevent duplicate playlist
+		playlist = [...data];
+
+		return [...data];
 	});
 
 	onDestroy(current_song_sub);
@@ -107,7 +133,7 @@
 						class="w-8 h-8 flex items-center justify-center focus:outline-none amplitude-play-pause"
 						id="play-pause"
 					>
-						{#if Amplitude.getPlayerState() != 'playing'}
+						{#if player_state == 'playing'}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								stroke-width="2"
