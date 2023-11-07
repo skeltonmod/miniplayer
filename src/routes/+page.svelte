@@ -10,16 +10,6 @@
 	let playing = false;
 
 	// Song list
-	// const playlist = [
-	// 	{
-	// 		name: '【Vocaloid】ENISHI【Drumstep】',
-	// 		artist: 'Kuroneko Lounge',
-	// 		album: 'Tohou Collection Vol. 1',
-	// 		url: 'https://ytd-lemon.vercel.app/api/ytdl/download?v=jE28lE992d8&type=audio',
-	// 		cover_art_url:
-	// 			'https://i.ytimg.com/vi/Zk-nheLN0j8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLATE9J6n4wvYkk6eY7mWiJMcl6_8Q'
-	// 	},
-	// ];
 
 	onMount(() => {
 		Amplitude.init({
@@ -59,7 +49,9 @@
 	const playlist_sub = playlist_store.subscribe((data) => {
 		const last_song = data[data.length - 1];
 		Amplitude.addSongToPlaylist(last_song, 'my-playlist');
-
+		if(data.length > 0){
+			Amplitude.playPlaylistSongAtIndex( 0, 'my-playlist' )
+		}
 		return [...data, last_song];
 	});
 
