@@ -4,7 +4,13 @@
 	let suggestions = [];
 	let search_results = '';
 	let open_dropdown = false;
-	import { current_song_store } from '../../util/store';
+	import { current_song_store, playlist_store } from '../../util/store';
+
+	function add_to_playlist(song) {
+		playlist_store.update(data => {
+			return [...data, song];
+		});
+	}
 
 	async function search_suggestion(value) {
 		const query = value;
@@ -60,7 +66,11 @@
 	</div>
 
 	<button
-		type="submit"
+		type="button"
+		on:click={() => {
+			search_video(search_query);
+			search_query = '';
+		}}
 		class="rounded-md inline-flex items-center py-2.5 px-3 ml-2 text-sm font-medium text-gray border hover:border-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
 	>
 		<svg
@@ -111,6 +121,7 @@
 							on:click={() => {
 								current_song_store.update((data) => {
 									const song_info = {
+										id: item.videoId,
 										name: item.title,
 										artist: item.author.name,
 										album: item.author.name,
@@ -134,7 +145,20 @@
 						</button>
 						<div class="flex-1">{item.title}</div>
 						<div class="text-xs text-gray-400 px-1.5">{item.duration}</div>
-						<button class="focus:outline-none pr-4 group">
+						<button
+							class="focus:outline-none pr-4 group"
+							on:click={() => {
+								add_to_playlist({
+									id: item.videoId,
+									name: item.title,
+									artist: item.author.name,
+									album: item.author.name,
+									url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
+									cover_art_url: item.thumbnail.url,
+									duration:  item.duration
+								});
+							}}
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"

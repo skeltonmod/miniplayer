@@ -3,31 +3,23 @@
 	// Default binding doesn't fucking work
 	import TabbedComponent from '$lib/TabbedComponent.svelte';
 	import Amplitude from 'amplitudejs';
-  import { onDestroy, onMount } from 'svelte';
-  import {current_song_store} from '../util/store';
+	import { onDestroy, onMount } from 'svelte';
+	import { current_song_store, playlist_store } from '../util/store';
+	import Image from '../asset/Elijah.png';
 
 	let playing = false;
-	
 
 	// Song list
-	const playlist = [
-		{
-			name: '【Vocaloid】ENISHI【Drumstep】',
-			artist: 'Kuroneko Lounge',
-			album: 'Tohou Collection Vol. 1',
-			url: 'https://ytd-lemon.vercel.app/api/ytdl/download?v=jE28lE992d8&type=audio',
-			cover_art_url:
-				'https://i.ytimg.com/vi/Zk-nheLN0j8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLATE9J6n4wvYkk6eY7mWiJMcl6_8Q'
-		},
-		{
-			name: 'Rebel Path (Cello Version)',
-			artist: 'OST Station',
-			album: 'Cyberpunk 2077 OST',
-			url: 'https://ytd-lemon.vercel.app/api/ytdl/download?v=AGsjA1pXajk&type=audio',
-			cover_art_url:
-				'https://i.ytimg.com/vi/js0GubNFQE0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAhzPk90ArIwrDt72ggYpfoW40a6w'
-		}
-	];
+	// const playlist = [
+	// 	{
+	// 		name: '【Vocaloid】ENISHI【Drumstep】',
+	// 		artist: 'Kuroneko Lounge',
+	// 		album: 'Tohou Collection Vol. 1',
+	// 		url: 'https://ytd-lemon.vercel.app/api/ytdl/download?v=jE28lE992d8&type=audio',
+	// 		cover_art_url:
+	// 			'https://i.ytimg.com/vi/Zk-nheLN0j8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLATE9J6n4wvYkk6eY7mWiJMcl6_8Q'
+	// 	},
+	// ];
 
 	onMount(() => {
 		Amplitude.init({
@@ -36,26 +28,43 @@
 			// 	39: 'next',
 			// 	32: 'play_pause'
 			// },
-			songs: playlist,
 			debug: true,
+			songs: [],
 			callbacks: {
 				// Dogshit coding practice
 				pause: function () {
+					console.log('Paused');
 					playing = false;
 				},
 				playing: function () {
 					playing = true;
+				},
+
+				stopped: function () {
+					console.log('Paused');
 				}
 			}
 		});
+
+		Amplitude.addPlaylist('my-playlist', {}, []);
 	});
 
-  const unsubscribe = current_song_store.subscribe(data => {
-    Amplitude.stop();
-    Amplitude.playNow(data);
-  })
+	const current_song_sub = current_song_store.subscribe((data) => {
+		Amplitude.stop();
+		Amplitude.playNow(data);
 
-  onDestroy(unsubscribe);
+		return data;
+	});
+
+	const playlist_sub = playlist_store.subscribe((data) => {
+		const last_song = data[data.length - 1];
+		Amplitude.addSongToPlaylist(last_song, 'my-playlist');
+
+		return [...data, last_song];
+	});
+
+	onDestroy(current_song_sub);
+	onDestroy(playlist_sub);
 </script>
 
 <main>
@@ -68,6 +77,7 @@
 					alt="photo"
 					class="object-cover"
 					id="amplitude-album-art"
+					src={Image}
 				/>
 				<div
 					class="absolute p-4 inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-gray-900 backdrop backdrop-blur-5 text-white"
@@ -105,7 +115,7 @@
 						class="w-8 h-8 flex items-center justify-center focus:outline-none amplitude-play-pause"
 						id="play-pause"
 					>
-						{#if playing}
+						{#if Amplitude.getPlayerState() != 'playing'}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								stroke-width="2"
@@ -147,11 +157,11 @@
 					</button>
 				</div>
 				<div>
-					<span id="amplitude-audio-duration" class="amplitude-duration-minutes"> 0 </span>
+					<span id="amplitude-audio-duration" class="amplitude-duration-minutes" />
 					: <span class="amplitude-duration-seconds" />
 				</div>
 			</div>
-			<TabbedComponent/>
+			<TabbedComponent />
 		</div>
 		<footer class="footer items-end justify-center p-4 text-neutral-content">
 			<aside class="items-end grid-flow-col">
