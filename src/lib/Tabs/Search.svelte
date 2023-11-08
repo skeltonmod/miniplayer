@@ -6,13 +6,6 @@
 	let search_query = '';
 	let suggestions = [];
 	let search_results = '';
-	import { current_song_store, playlist_store } from '../../util/store';
-
-	function add_to_playlist(song) {
-		playlist_store.update((data) => {
-			return [...data, song];
-		});
-	}
 
 	async function search_suggestion(value) {
 		const query = value;
