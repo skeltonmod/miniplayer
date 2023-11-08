@@ -8,29 +8,19 @@ export const GET = async ({ url }) => {
 	if (!id) throw new Error('Invalid Id');
 
 	try {
-		if (type === 'video') {
-			const videoStream = await yt.download(id, {
-				type: 'video+audio',
+		if (type === 'audio') {
+			const audioStream = await yt.download(id, {
+				type: 'audio',
 				quality: 'best',
 				format: 'mp4',
 				client: 'ANDROID'
 			});
 
-			return new Response(videoStream, {
+			return new Response(audioStream, {
 				headers: {
-					'Content-Type': 'video/mp4'
+					'Content-Type': 'audio/mpeg', // Use a standard MIME type for audio files
 				}
 			});
-		}
-
-		if (type === 'audio') {
-			const audioStream = await yt.download(id, {
-				type: 'audio',
-				quality: 'best',
-				format: 'any',
-				client: 'ANDROID'
-			});
-			return new Response(audioStream);
 		}
 	} catch (error) {
 		console.error(error);

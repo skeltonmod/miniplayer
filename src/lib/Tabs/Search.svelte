@@ -115,7 +115,7 @@
 									artist: item.author.name,
 									album: item.author.name,
 									url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
-									cover_art_url: item.thumbnail.url
+									cover_art_url: item.thumbnail.url,
 								};
 								playMusic(song_info, false, Amplitude);
 							}}
