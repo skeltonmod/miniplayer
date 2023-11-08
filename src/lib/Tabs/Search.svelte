@@ -1,16 +1,11 @@
 <script lang="js">
 	// @ts-nocheck
+
+	import { addToPlaylist, playMusic } from '../../methods/music_controller';
+	// @ts-nocheck
 	let search_query = '';
 	let suggestions = [];
 	let search_results = '';
-	let open_dropdown = false;
-	import { current_song_store, playlist_store } from '../../util/store';
-
-	function add_to_playlist(song) {
-		playlist_store.update(data => {
-			return [...data, song];
-		});
-	}
 
 	async function search_suggestion(value) {
 		const query = value;
@@ -23,12 +18,7 @@
 			}
 		});
 
-		if (response.status !== 200) {
-			open_dropdown = false;
-			return;
-		}
 		suggestions = await response.json();
-		open_dropdown = true;
 	}
 
 	async function search_video(value) {
@@ -46,8 +36,6 @@
 
 		search_results = await response.json();
 	}
-
-	$: search_results, console.log('search results', search_results);
 </script>
 
 <div class="flex items-center pb-1 px-2">
@@ -119,18 +107,15 @@
 						<button
 							class="p-3 hover:bg-green-500 group focus:outline-none"
 							on:click={() => {
-								current_song_store.update((data) => {
-									const song_info = {
-										id: item.videoId,
-										name: item.title,
-										artist: item.author.name,
-										album: item.author.name,
-										url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
-										cover_art_url: item.thumbnail.url
-									};
-
-									return song_info;
-								});
+								const song_info = {
+									id: item.videoId,
+									name: item.title,
+									artist: item.author.name,
+									album: item.author.name,
+									url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
+									cover_art_url: item.thumbnail.url
+								};
+								playMusic(song_info, false, Amplitude);
 							}}
 						>
 							<svg
@@ -148,15 +133,15 @@
 						<button
 							class="focus:outline-none pr-4 group"
 							on:click={() => {
-								add_to_playlist({
+								addToPlaylist({
 									id: item.videoId,
 									name: item.title,
 									artist: item.author.name,
 									album: item.author.name,
 									url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
 									cover_art_url: item.thumbnail.url,
-									duration:  item.duration
-								});
+									duration: item.duration
+								}, Amplitude);
 							}}
 						>
 							<svg

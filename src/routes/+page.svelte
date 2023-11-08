@@ -2,17 +2,13 @@
 	// @ts-nocheck
 	// Default binding doesn't fucking work
 	import TabbedComponent from '$lib/TabbedComponent.svelte';
-	import Amplitude from 'amplitudejs';
 	import { onDestroy, onMount } from 'svelte';
-	import { current_song_store, playlist_store } from '../util/store';
-	import Image from '../asset/Elijah.png';
-	import uniqBy from "lodash/uniqBy";
-
+	import Image from '../asset/Elijah.png'; 
+	import { initialize } from '../methods/music_controller';
 	let player_state = 'stopped';
 	let audio_element = null;
-	let current_song = {};
 	let playlist = [];
-	// Song list
+
 	onMount(() => {
 		Amplitude.init({
 			songs: playlist.length ? playlist : [],
@@ -35,54 +31,16 @@
 			player_state = 'playing';
 		});
 
-		audio_element.addEventListener('loadeddata', function(e){
-			this.play()
+		audio_element.addEventListener('loadeddata', function (e) {
+			console.log('WOW');
+			this.play();
 		});
 
 		audio_element.addEventListener('pause', function (e) {
 			player_state = 'paused';
 		});
+		initialize(Amplitude);
 	});
-
-	const current_song_sub = current_song_store.subscribe((data) => {
-		if (!Object.keys(data).length) {
-			console.error('Empty Data');
-			return {};
-		}
-		current_song = data;
-		Amplitude.stop();
-		Amplitude.playNow(data);
-		return data;
-	});
-
-	const playlist_sub = playlist_store.subscribe((data) => {
-		const last_song = data[data.length - 1];
-		//
-		if (last_song == undefined) {
-			return [];
-		}
-		if (data == undefined) {
-			return [];
-		}
-		
-		if(Amplitude.getSongs().length > 0){
-			Amplitude.addSong(last_song);
-		}else{
-			data.forEach(item => {
-				Amplitude.addSong(item);
-			});
-		}
-
-		console.log(Amplitude.getSongs());
-
-		// Clear the previous song stack to prevent duplicate playlist
-		playlist = [...data];
-
-		return [...data];
-	});
-
-	onDestroy(current_song_sub);
-	onDestroy(playlist_sub);
 </script>
 
 <main>
@@ -110,6 +68,7 @@
 					class="absolute h-full w-full bg-green-500 progress-success flex items-center justify-end amplitude-song-played-progress"
 				/>
 			</div>
+			
 			<div class="flex justify-between text-xs font-semibold text-gray-500 px-4 py-2">
 				<div>
 					<span class="amplitude-current-minutes" />:<span class="amplitude-current-seconds" />
@@ -129,6 +88,7 @@
 						>
 					</button>
 					<!-- PLAY BUTTON -->
+					
 					<button
 						class="w-8 h-8 flex items-center justify-center focus:outline-none amplitude-play-pause"
 						id="play-pause"
@@ -178,6 +138,15 @@
 					<span id="amplitude-audio-duration" class="amplitude-duration-minutes" />
 					: <span class="amplitude-duration-seconds" />
 				</div>
+				
+				
+			</div>
+			<div class='flex text-xs font-semibold text-gray-500 px-4 py-1 justify-center items-center content-center'>
+				<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+					<path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+				  </svg>
+				  
+				<input type="range" class="amplitude-volume-slider range range-xs h-4 w-1/4 range-info px-4 mx-2"/>
 			</div>
 			<TabbedComponent />
 		</div>

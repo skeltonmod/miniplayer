@@ -8,7 +8,6 @@
 		{ label: 'Queue', value: 1, component: Queue },
 		{ label: 'Search', value: 2, component: Search }
 	];
-    
 </script>
 
 <div class="tabs justify-start pb-1.5">
