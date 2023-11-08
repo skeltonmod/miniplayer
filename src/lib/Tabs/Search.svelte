@@ -36,6 +36,8 @@
 
 		search_results = await response.json();
 	}
+
+	console.log(`${window.location.protocol}//${window.location.hostname}`);
 </script>
 
 <div class="flex items-center pb-1 px-2">
@@ -112,7 +114,7 @@
 									name: item.title,
 									artist: item.author.name,
 									album: item.author.name,
-									url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
+									url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
 									cover_art_url: item.thumbnail.url
 								};
 								playMusic(song_info, false, Amplitude);
@@ -138,7 +140,7 @@
 									name: item.title,
 									artist: item.author.name,
 									album: item.author.name,
-									url: `https://ytd-lemon.vercel.app/api/ytdl/download?v=${item.videoId}&type=audio`,
+									url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
 									cover_art_url: item.thumbnail.url,
 									duration: item.duration
 								}, Amplitude);
