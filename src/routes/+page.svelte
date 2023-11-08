@@ -5,6 +5,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Image from '../asset/Elijah.png';
 	import { initialize, seek } from '../methods/music_controller';
+	import { get } from 'svelte/store';
+	import { current_song_store } from '../util/store';
 	let player_state = 'stopped';
 	let audio_element = null;
 	let playlist = [];
@@ -39,12 +41,25 @@
 			player_state = 'paused';
 		});
 		initialize(Amplitude);
-		document.getElementById('song-played-progress').addEventListener('click', function (e) {
-			var offset = this.getBoundingClientRect();
-			var x = e.pageX - offset.left;
+	});
 
-			seek((parseFloat(x) / parseFloat(this.offsetWidth)) * 100, Amplitude);
-		});
+	current_song_store.subscribe((item) => {
+		if (Object.keys(item).length > 0) {
+			if ('mediaSession' in navigator) {
+				const current_song = get(current_song_store);
+
+				navigator.mediaSession.metadata = new MediaMetadata({
+					title: current_song.name,
+					artist: current_song.artist,
+					album: current_song.album,
+					artwork: [
+						{
+							src: current_song.cover_art_url
+						}
+					]
+				});
+			}
+		}
 	});
 </script>
 
