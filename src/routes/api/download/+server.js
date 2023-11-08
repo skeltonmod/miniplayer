@@ -30,11 +30,7 @@ export const GET = async ({ url }) => {
 				format: 'any',
 				client: 'ANDROID'
 			});
-			return new Response(audioStream, {
-				headers: {
-					'Content-Type': 'audio/mpeg'
-				}
-			});
+			return new Response(audioStream);
 		}
 	} catch (error) {
 		console.error(error);
