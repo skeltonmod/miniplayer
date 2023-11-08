@@ -38,5 +38,13 @@ export const playMusic = (song_object, fromQueue = false, _amplitude) => {
         return song_object
     });
     // Check if you're playing via the search tab
+    _amplitude.stop();
     _amplitude.playNow(song_object);
+    
+}
+
+export const seek = (value, _amplitude) => {
+    console.log(value);
+    _amplitude.setSongPlayedPercentage(96.26736111111111);
+    // console.log(_amplitude.getSongPlayedPercentage());
 }
