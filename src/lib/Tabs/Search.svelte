@@ -36,8 +36,6 @@
 
 		search_results = await response.json();
 	}
-
-	console.log(`${window.location.protocol}//${window.location.hostname}`);
 </script>
 
 <div class="flex items-center pb-1 px-2">

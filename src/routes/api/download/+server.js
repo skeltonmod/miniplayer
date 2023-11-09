@@ -2,10 +2,6 @@ import { json } from '@sveltejs/kit';
 import { get } from 'svelte/store';
 import { Innertube } from 'youtubei.js';
 import { device_store } from '../../../util/store.js';
-import ffmpeg from 'fluent-ffmpeg';
-import ytdl from 'ytdl-core';
-import path from 'path';
-
 const yt = await Innertube.create();
 
 export const GET = async ({ url }) => {
@@ -16,9 +12,9 @@ export const GET = async ({ url }) => {
 	try {
 		if (type === 'audio') {
 			const audioStream = await yt.download(id, {
-				type: 'audio',
+				type: 'video+audio',
 				quality: 'best',
-				format: ios ? 'mp4' : 'any',
+				format: 'mp4',
 				client: 'ANDROID'
 			});
 
