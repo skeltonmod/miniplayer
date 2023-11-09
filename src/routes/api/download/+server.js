@@ -7,7 +7,6 @@ export const GET = async ({ url }) => {
 	const id = new URL(url).searchParams.get('v');
 	const type = new URL(url).searchParams.get('type');
 	if (!id) throw new Error('Invalid Id');
-	const ios = get(device_store);
 	try {
 		if (type === 'audio') {
 			const audioStream = await yt.download(id, {
