@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { get } from 'svelte/store';
 import { Innertube } from 'youtubei.js';
-import { device_store } from '../../../util/store.js';
 const yt = await Innertube.create();
 
 export const GET = async ({ url }) => {
