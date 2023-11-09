@@ -6,12 +6,22 @@
 	import Image from '../asset/Elijah.png';
 	import { initialize, seek } from '../methods/music_controller';
 	import { get } from 'svelte/store';
-	import { current_song_store } from '../util/store';
+	import { current_song_store, device_store } from '../util/store';
 	let player_state = 'stopped';
 	let audio_element = null;
 	let playlist = [];
 
 	onMount(() => {
+		function iOS() {
+			return (
+				['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+					navigator.platform
+				) ||
+				// iPad on iOS 13 detection
+				(navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+			);
+		}
+
 		Amplitude.init({
 			songs: playlist.length ? playlist : [],
 			callbacks: {
@@ -41,6 +51,8 @@
 			player_state = 'paused';
 		});
 		initialize(Amplitude);
+
+		$device_store = iOS();
 	});
 
 	current_song_store.subscribe((item) => {
@@ -155,8 +167,10 @@
 					</button>
 				</div>
 				<div>
-					<span id="amplitude-audio-duration" class="amplitude-duration-minutes" />
-					: <span class="amplitude-duration-seconds" />
+					{#if !$device_store}
+						<span id="amplitude-audio-duration" class="amplitude-duration-minutes" />
+						: <span class="amplitude-duration-seconds" />
+					{/if}
 				</div>
 			</div>
 			<div
