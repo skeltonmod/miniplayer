@@ -1,18 +1,24 @@
 import { json } from '@sveltejs/kit';
+import { get } from 'svelte/store';
 import { Innertube } from 'youtubei.js';
+import { device_store } from '../../../util/store.js';
+import ffmpeg from 'fluent-ffmpeg';
+import ytdl from 'ytdl-core';
+import path from 'path';
+
 const yt = await Innertube.create();
 
 export const GET = async ({ url }) => {
 	const id = new URL(url).searchParams.get('v');
 	const type = new URL(url).searchParams.get('type');
 	if (!id) throw new Error('Invalid Id');
-
+	const ios = get(device_store);
 	try {
 		if (type === 'audio') {
 			const audioStream = await yt.download(id, {
 				type: 'audio',
 				quality: 'best',
-				format: 'mp4',
+				format: ios ? 'mp4' : 'any',
 				client: 'ANDROID'
 			});
 
