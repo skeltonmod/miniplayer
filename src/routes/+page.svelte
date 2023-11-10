@@ -6,7 +6,7 @@
 	import Image from '../asset/Elijah.png';
 	import { changeCurrentSong, initialize, playMusic, seek } from '../methods/music_controller';
 	import { get } from 'svelte/store';
-	import { current_song_store, device_store, playlist_store } from '../util/store';
+	import { current_song_store, device_store, playlist_store, title } from '../util/store';
 	let player_state = 'stopped';
 	let audio_element = null;
 	let playlist = [];
@@ -42,6 +42,7 @@
 			$current_song_store = Amplitude.getActiveSongMetadata();
 			
 			changeCurrentSong(Amplitude.getActiveSongMetadata())
+			$title = Amplitude.getActiveSongMetadata().name;
 			player_state = 'playing';
 		});
 
