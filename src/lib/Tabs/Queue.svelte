@@ -1,29 +1,50 @@
 <script>
 	// @ts-nocheck
-	import { playMusic, removeFromPlaylist } from '../../methods/music_controller';
-	import { playlist_store } from '../../util/store';
+	import { checkMusic, playMusic, removeFromPlaylist } from '../../methods/music_controller';
+	import { playlist_store, current_song_store } from '../../util/store';
 </script>
 
 <div class="scrollable-content h-auto max-h-52 overflow-y-scroll w-full">
 	{#if $playlist_store.length > 0}
 		<ul class="text-xs sm:text-base divide-y border-t cursor-default">
 			{#each $playlist_store as item}
-				<li class="flex items-center space-x-3 hover:bg-gray-100">
+				<li
+					class={`flex items-center space-x-3 hover:bg-gray-100 ${
+						item.playing ? 'bg-green-300' : ''
+					}`}
+				>
 					<button
 						on:click={() => {
-							playMusic(item, true, Amplitude);
+							playMusic(item, Amplitude);
 						}}
 						class="p-4 hover:bg-green-500 group focus:outline-none"
 					>
-						<svg
-							class="w-4 h-4 group-hover:text-white"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
-						>
+						{#if item.playing}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								stroke-width="2"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								class="w-4 h-4 group-hover:text-white"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="w-4 h-4 group-hover:text-white"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
+							>
+						{/if}
 					</button>
 					<div class="flex-1">{item.name}</div>
 					<div class="text-xs text-gray-400 px-1.5">{item.duration}</div>

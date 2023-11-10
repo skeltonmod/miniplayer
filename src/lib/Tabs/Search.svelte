@@ -1,11 +1,18 @@
 <script lang="js">
 	// @ts-nocheck
 
-	import { addToPlaylist, playMusic } from '../../methods/music_controller';
+	import {
+		addToPlaylist,
+		checkMusic,
+		playMusic,
+		removeFromPlaylist
+	} from '../../methods/music_controller';
+	import { current_song_store, playlist_store } from '../../util/store';
+	import includes from 'lodash/includes';
 	// @ts-nocheck
 	let search_query = '';
 	let suggestions = [];
-	let search_results = '';
+	let search_results = [];
 
 	async function search_suggestion(value) {
 		const query = value;
@@ -34,10 +41,21 @@
 			return console.error(response.status, response);
 		}
 
-		search_results = await response.json();
-	}
+		const results = await response.json();
 
-	console.log(`${window.location.protocol}//${window.location.hostname}`);
+		search_results = results.map((item) => {
+			return {
+				id: item.videoId,
+				name: item.title,
+				artist: item.author.name,
+				album: item.author.name,
+				url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
+				cover_art_url: item.thumbnail.url,
+				duration: item.duration,
+				playing: item.videoId == $current_song_store.id
+			};
+		});
+	}
 </script>
 
 <div class="flex items-center pb-1 px-2">
@@ -105,57 +123,80 @@
 		{#each search_results as item}
 			<div>
 				<ul class="text-xs sm:text-base divide-y border-t cursor-default">
-					<li class="flex items-center space-x-3 hover:bg-gray-100">
+					<li
+						class={`flex items-center space-x-3 hover:bg-gray-100 ${
+							checkMusic(item.id, $playlist_store) ? 'bg-blue-300' : ''
+						}`}
+					>
 						<button
 							class="p-3 hover:bg-green-500 group focus:outline-none"
 							on:click={() => {
-								const song_info = {
-									id: item.videoId,
-									name: item.title,
-									artist: item.author.name,
-									album: item.author.name,
-									url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
-									cover_art_url: item.thumbnail.url,
-								};
-								playMusic(song_info, false, Amplitude);
+								playMusic(item, Amplitude);
 							}}
 						>
-							<svg
-								class="w-4 h-4 group-hover:text-white"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
-							>
+							{#if $current_song_store.id == item.id}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									stroke-width="2"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									class="w-4 h-4 group-hover:text-white"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+									/>
+								</svg>
+							{:else}
+								<svg
+									class="w-4 h-4 group-hover:text-white"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg
+								>
+							{/if}
 						</button>
-						<div class="flex-1">{item.title}</div>
+						<div class="flex-1">{item.name}</div>
 						<div class="text-xs text-gray-400 px-1.5">{item.duration}</div>
+
 						<button
 							class="focus:outline-none pr-4 group"
 							on:click={() => {
-								addToPlaylist({
-									id: item.videoId,
-									name: item.title,
-									artist: item.author.name,
-									album: item.author.name,
-									url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
-									cover_art_url: item.thumbnail.url,
-									duration: item.duration
-								}, Amplitude);
+								if (!checkMusic(item.id, $playlist_store)) {
+									addToPlaylist(item, Amplitude);
+								} else {
+									removeFromPlaylist(item, Amplitude);
+								}
 							}}
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke-width="1.5"
-								stroke="currentColor"
-								class="w-6 h-6"
-							>
-								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-							</svg>
+							{#if !checkMusic(item.id, $playlist_store)}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="w-6 h-6"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="w-6 h-6"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+								</svg>
+							{/if}
 						</button>
 					</li>
 				</ul>
