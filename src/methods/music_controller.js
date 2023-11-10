@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { get } from "svelte/store";
 import { playlist_store, current_song_store } from "../util/store";
+import { isEqual } from "lodash";
 
 
 export const addToPlaylist = (song_object, _amplitude) => {
-    console.log(_amplitude);
+    
     playlist_store.update(song => {
         return [...song, song_object];
     });
@@ -18,7 +19,7 @@ export const removeFromPlaylist = (song_object, _amplitude) => {
         return song.filter(item => item.id !== song_object.id);
     });
 
-    console.log(_amplitude.getSongs());
+    
     const song_index = _amplitude.getSongs().findIndex(item => item.id == song_object.id);
 
     _amplitude.removeSong(song_index);
@@ -26,25 +27,49 @@ export const removeFromPlaylist = (song_object, _amplitude) => {
 
 export const initialize = (_amplitude) => {
     const playlist = get(playlist_store);
-    playlist.forEach(item => {
+    new Set(playlist).forEach(item => {
         _amplitude.addSong(item);
     })
-    console.log(playlist);
-    console.log(_amplitude.getSongs());
+    
+    playlist_store.update(item => {
+        return item.map(data => {
+            return {
+                ...data,
+                playing: false
+            }
+        });
+    });
 }
 
-export const playMusic = (song_object, fromQueue = false, _amplitude) => {
-    current_song_store.update(() => {
-        return song_object
-    });
-    // Check if you're playing via the search tab
-    _amplitude.stop();
-    _amplitude.playNow(song_object);
-    
+export const playMusic = (song_object, _amplitude) => {
+    if(Object.keys(song_object).length > 0){
+        _amplitude.playNow(song_object);
+    }
 }
 
 export const seek = (value, _amplitude) => {
-    console.log(value);
+    
     _amplitude.setSongPlayedPercentage(96.26736111111111);
-    // console.log(_amplitude.getSongPlayedPercentage());
+}
+
+export const checkMusic = (id, playlist) => {
+    return playlist.filter(item => item.id == id).length > 0;
+}
+
+export const changeCurrentSong = (song_object) =>{
+    playlist_store.update(data => {
+        return data.map(item => {
+            return {
+                ...item,
+                playing: (isEqual(song_object, item))
+            }
+        })
+    });
+
+    current_song_store.update((item) => {
+        if(Object.keys(song_object).length > 0){
+            return song_object
+        }
+        return {...item, playing: false};
+    });
 }

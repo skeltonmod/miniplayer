@@ -2,11 +2,11 @@
 	// @ts-nocheck
 	// Default binding doesn't fucking work
 	import TabbedComponent from '$lib/TabbedComponent.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import Image from '../asset/Elijah.png';
-	import { initialize, seek } from '../methods/music_controller';
+	import { changeCurrentSong, initialize, playMusic, seek } from '../methods/music_controller';
 	import { get } from 'svelte/store';
-	import { current_song_store, device_store } from '../util/store';
+	import { current_song_store, device_store, playlist_store } from '../util/store';
 	let player_state = 'stopped';
 	let audio_element = null;
 	let playlist = [];
@@ -27,11 +27,9 @@
 			callbacks: {
 				// Dogshit coding practice
 				pause: function () {
-					console.log('Paused');
 					player_state = 'paused';
 				},
 				playing: function () {
-					console.log('Playing');
 					player_state = 'playing';
 				}
 			}
@@ -40,16 +38,27 @@
 		audio_element = Amplitude.getAudio();
 
 		audio_element.addEventListener('playing', function (e) {
+			// Amplitude.bindNewElements();
+			$current_song_store = Amplitude.getActiveSongMetadata();
+			
+			changeCurrentSong(Amplitude.getActiveSongMetadata())
 			player_state = 'playing';
 		});
 
 		audio_element.addEventListener('loadeddata', function (e) {
+			console.log("Loaded");
 			this.play();
 		});
 
 		audio_element.addEventListener('pause', function (e) {
 			player_state = 'paused';
+			playMusic({}, Amplitude);
 		});
+
+		// audio_element.addEventListener('ended', function(e) {
+			
+		// });
+
 		initialize(Amplitude);
 
 		$device_store = iOS();
@@ -124,6 +133,14 @@
 					<button
 						class="w-8 h-8 flex items-center justify-center focus:outline-none amplitude-play-pause"
 						id="play-pause"
+						on:click={() => {
+							console.log(Amplitude.getSongsState());
+							if (Object.keys(Amplitude.getActiveSongMetadata()).length == 0) {
+								if ($playlist_store.length > 0) {
+									playMusic({...$playlist_store[0], playing: false}, Amplitude);
+								}
+							}
+						}}
 					>
 						{#if player_state == 'playing'}
 							<svg
@@ -167,9 +184,10 @@
 					</button>
 				</div>
 				<div>
-					{#if !$device_store}
-						<span id="amplitude-audio-duration" class="amplitude-duration-minutes" />
-						: <span class="amplitude-duration-seconds" />
+					{#if Object.keys($current_song_store).length > 0}
+						{$current_song_store.duration}
+					{:else}
+						0:00
 					{/if}
 				</div>
 			</div>
