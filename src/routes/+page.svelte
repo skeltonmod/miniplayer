@@ -86,8 +86,8 @@
 </script>
 
 <main>
-	<div class="min-h-screen bg-gray-100 flex flex-col items-center lg:py-10" id="player">
-		<div class="max-w-xl bg-white lg:rounded-lg shadow-lg overflow-hidden">
+	<div class="min-h-screen linear-gradient(to right, rgb(55, 65, 81), rgb(17, 24, 39), rgb(0, 0, 0)) flex flex-col items-center lg:py-10" id="player">
+		<div class="max-w-xl bg-black lg:rounded-lg shadow-lg overflow-hidden">
 			<div class="relative" id="amplitude-album-art">
 				<!-- svelte-ignore a11y-img-redundant-alt -->
 				<img
