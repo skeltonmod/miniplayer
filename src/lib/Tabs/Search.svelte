@@ -7,7 +7,7 @@
 		playMusic,
 		removeFromPlaylist
 	} from '../../methods/music_controller';
-	import { current_song_store, playlist_store } from '../../util/store';
+	import { current_song_store, is_dark_theme, playlist_store } from '../../util/store';
 	import includes from 'lodash/includes';
 	// @ts-nocheck
 	let search_query = '';
@@ -64,7 +64,7 @@
 		<input
 			type="text"
 			id="voice-search"
-			class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 rounded-md"
+			class={`${$is_dark_theme ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'} border border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 rounded-md`}
 			placeholder="Search for music"
 			required=""
 			on:input={(e) => search_suggestion(e.target.value)}
@@ -79,7 +79,7 @@
 			search_video(search_query);
 			search_query = '';
 		}}
-		class="rounded-md inline-flex items-center py-2.5 px-3 ml-2 text-sm font-medium text-gray border hover:border-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+		class="rounded-md inline-flex items-center py-2.5 px-3 ml-2 text-sm font-medium text-gray border hover:border-gray-300 focus:ring-2 focus:outline-none focus:ring-white"
 	>
 		<svg
 			aria-hidden="true"
@@ -100,7 +100,7 @@
 <div hidden={search_query.length == 0}>
 	{#if suggestions.length > 0}
 		<div class="h-40 overflow-y-scroll w-full">
-			<div class="shadow menu dropdown-content z-[40] bg-base-100 rounded-box px-4">
+			<div class={`shadow menu dropdown-content z-[40] rounded-box px-4 ${$is_dark_theme ? 'text-white' : 'text-gray-900'}`}>
 				<ul class="menu menu-compact">
 					{#each suggestions as item, index}
 						<li key={index} class="border-b border-b-base-content/10 w-full">

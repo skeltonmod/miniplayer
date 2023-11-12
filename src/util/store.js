@@ -7,6 +7,7 @@ export const current_song_store = writable({});
 export const playlist_store = persist(writable([]), createLocalStorage(), "playlist");
 export const amplitude_store = writable(undefined);
 export const device_store = writable(false);
+export const is_dark_theme = writable(false);
 
 function createTitle() {
 	const {subscribe, set, update} = writable('');
