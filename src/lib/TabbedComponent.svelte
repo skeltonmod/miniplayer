@@ -13,7 +13,7 @@
 <div class="tabs justify-start pb-1.5">
 	{#each tabs as item}
 		<span
-			class={`tab tab-lifted ${activeTabValue === item.value ? 'tab-active' : ''}`}
+			class={`tab tab-lifted ${activeTabValue === item.value ? 'tab-active' : 'text-gray-600'}`}
 			on:click={handleClick(item.value)}>{item.label}</span
 		>
 	{/each}
