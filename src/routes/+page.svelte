@@ -6,7 +6,14 @@
 	import Image from '../asset/Elijah.png';
 	import { changeCurrentSong, initialize, playMusic, seek } from '../methods/music_controller';
 	import { get } from 'svelte/store';
-	import { current_song_store, device_store, playlist_store, title } from '../util/store';
+	import {
+		current_song_store,
+		device_store,
+		is_dark_theme,
+		playlist_store,
+		title
+	} from '../util/store';
+	import { updateTheme } from '../methods/theme_controller';
 	let player_state = 'stopped';
 	let audio_element = null;
 	let playlist = [];
@@ -40,14 +47,14 @@
 		audio_element.addEventListener('playing', function (e) {
 			// Amplitude.bindNewElements();
 			$current_song_store = Amplitude.getActiveSongMetadata();
-			
-			changeCurrentSong(Amplitude.getActiveSongMetadata())
+
+			changeCurrentSong(Amplitude.getActiveSongMetadata());
 			$title = Amplitude.getActiveSongMetadata().name;
 			player_state = 'playing';
 		});
 
 		audio_element.addEventListener('loadeddata', function (e) {
-			console.log("Loaded");
+			console.log('Loaded');
 			this.play();
 		});
 
@@ -57,7 +64,7 @@
 		});
 
 		// audio_element.addEventListener('ended', function(e) {
-			
+
 		// });
 
 		initialize(Amplitude);
@@ -86,8 +93,52 @@
 </script>
 
 <main>
-	<div class="min-h-screen bg-gray-100 flex flex-col items-center lg:py-10" id="player">
-		<div class="max-w-xl bg-white lg:rounded-lg shadow-lg overflow-hidden">
+	<div
+		class={`min-h-screen flex flex-col items-center ${
+			$is_dark_theme
+				? 'linear-gradient(to right, rgb(55, 65, 81), rgb(17, 24, 39), rgb(0, 0, 0))'
+				: 'bg-gray-100'
+		}`}
+		id="player"
+	>
+		<div class="w-full flex justify-end">
+			<button on:click={() => updateTheme()}>
+				{#if $is_dark_theme}
+					<div
+						class="transition ease-in-out delay-80 w-[40px] rounded-full bg-gray-900 hover:bg-gray-800 m-2"
+					>
+						<svg
+							class="w-5 ml-auto"
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							id="lightmode"
+							><path
+								d="M7 12c0 2.8 2.2 5 5 5s5-2.2 5-5-2.2-5-5-5-5 2.2-5 5zm5-3c1.7 0 3 1.3 3 3s-1.3 3-3 3-3-1.3-3-3 1.3-3 3-3zm1-4V3c0-.6-.4-1-1-1s-1 .4-1 1v2c0 .6.4 1 1 1s1-.4 1-1zm6.1-.1c-.4-.4-1-.4-1.4 0l-1.4 1.4c-.4.4-.4 1 0 1.4.2.2.5.3.7.3s.5-.1.7-.3l1.4-1.4c.4-.3.4-1 0-1.4zM21 11h-2c-.6 0-1 .4-1 1s.4 1 1 1h2c.6 0 1-.4 1-1s-.4-1-1-1zm-3.3 5.2c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l1.4 1.4c.2.2.5.3.7.3s.5-.1.7-.3c.4-.4.4-1 0-1.4l-1.4-1.4zM11 19v2c0 .6.4 1 1 1s1-.4 1-1v-2c0-.6-.4-1-1-1s-1 .4-1 1zm-6.1.1c.2.2.5.3.7.3s.5-.1.7-.3l1.4-1.4c.4-.4.4-1 0-1.4s-1-.4-1.4 0l-1.4 1.4c-.4.3-.4 1 0 1.4zM2 12c0 .6.4 1 1 1h2c.6 0 1-.4 1-1s-.4-1-1-1H3c-.6 0-1 .4-1 1zm4.3-7.1c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l1.4 1.4c.2.3.5.4.8.4s.5-.1.7-.3c.4-.4.4-1 0-1.4L6.3 4.9z"
+								fill="#dffff3"
+								class="color000000 svgShape"
+							/></svg
+						>
+					</div>
+				{:else}
+					<div
+						class="transition ease-in-out delay-80 border w-[40px] rounded-full bg-gray-300 hover:bg-gray-200 m-2"
+					>
+						<svg class="w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" id="Night"
+							><path
+								d="M23,20.58a1,1,0,0,0-.87-.62,6,6,0,0,1-4.1-10,1,1,0,0,0,.18-1,1,1,0,0,0-.87-.62,8,8,0,0,0-3.47.58,8,8,0,1,0,8.94,12.79A1,1,0,0,0,23,20.58Z"
+								fill="#2c2c2c"
+								class="color000000 svgShape"
+							/></svg
+						>
+					</div>
+				{/if}
+			</button>
+		</div>
+		<div
+			class={`max-w-xl lg:rounded-lg shadow-lg overflow-hidden ${
+				$is_dark_theme ? 'bg-black' : 'bg-white text-gray-500'
+			}`}
+		>
 			<div class="relative" id="amplitude-album-art">
 				<!-- svelte-ignore a11y-img-redundant-alt -->
 				<img
@@ -138,7 +189,7 @@
 							console.log(Amplitude.getSongsState());
 							if (Object.keys(Amplitude.getActiveSongMetadata()).length == 0) {
 								if ($playlist_store.length > 0) {
-									playMusic({...$playlist_store[0], playing: false}, Amplitude);
+									playMusic({ ...$playlist_store[0], playing: false }, Amplitude);
 								}
 							}
 						}}
