@@ -12,9 +12,9 @@ export const GET = async ({ url }) => {
 	try {
 		if (type === 'audio') {
 			const audioStream = await yt.download(id, {
-				type: ios ? 'video+audio' : 'audio',
+				type: 'video+audio',
 				quality: 'best',
-				format: ios ? 'mp4' : 'any',
+				format: 'mp4',
 				client: 'ANDROID'
 			});
 
