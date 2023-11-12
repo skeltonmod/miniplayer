@@ -49,7 +49,7 @@
 				name: item.title,
 				artist: item.author.name,
 				album: item.author.name,
-				url: `${window.location.protocol}//${window.location.hostname}/api/download?v=${item.videoId}&type=audio`,
+				url: `https://youtube-service-ejrf.onrender.com/fetch-video/${item.videoId}`,
 				cover_art_url: item.thumbnail.url,
 				duration: item.duration,
 				playing: item.videoId == $current_song_store.id
