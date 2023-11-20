@@ -13,3 +13,9 @@ A simple youtube player for streaming music
 - Download music option
 - SSR Tabs for that spotify goodness
 - Get a girlfriend
+
+### Contributor List
+
+<a href="https://github.com/skeltonmod/miniplayer/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=skeltonmod/miniplayer" />
+</a>
